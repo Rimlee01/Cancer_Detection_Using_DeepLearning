@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancer Detection Result</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='styles/Resultstyle.css')}}">
+</head>
+<body>
+    <div id="pred">{{value}}</div>
+    {% if value == 1 %}
+        <p id="preds"> YOU ARE CANCER PATIENT</p>
+    {% elif value == 'M'%}
+        <p id="preds"> YOU ARE CANCER PATIENT</p>
+    {% elif value =='B'%}
+        <p id="preds">CONGRATULATIONS YOU ARE NOT A CANCER PATIENT</p> 
+    {% else %}
+        <p id="preds">CONGRATULATIONS YOU ARE NOT A CANCER PATIENT</p> 
+    {% endif %}
+    <div id="preds">result</div>
+    <div id="container">
+        <div id="loading" class="overlay">
+            <div class="loader"></div>
+            <p class="loading-text">please wait result will be declear</p>
+        </div>
+        <div id="result" class="overlay hidden">
+            <div class="result-content">
+                <h2>Cancer Detection Result</h2>
+                <p id="result-message">Result will be shown here.</p>
+            </div>
+        </div>
+    </div>
+    <script src="{{url_for('static',filename='js/script.js')}}"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | Cancer Detection</title>
+    <link rel="stylesheet" href="{{url_for('static' , filename='styles/contact.css')}}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{url_for('main')}}">Home</a></li>
+                <li><a href="{{url_for('About')}}">About</a></li>
+                <li><a href="{{url_for('Contact')}}">Contact</a></li> 
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            <h1>Get in Touch with Us</h1>
+            <p>We're here to help. If you have any questions or comments, please don't hesitate to reach out.</p>
+        </section>
+        <section class="team-members">
+            <h2>Meet Our Team</h2>
+            <ul>
+                <li>
+                    <h3>Member 1</h3>
+                    <p>Name: Ananta Nayak</p>
+                    <p>Email: anantanayak337@gmail.com</p>
+                    <p>Phone Number: 9852752890</p>
+                </li>
+                <li>
+                    <h3>Member 2</h3>
+                    <p>Name: Rimlee Deka</p>
+                    <p>Email: rimlee001@gmail.com</p>
+                    <p>Phone Number: 7890432195</p>
+                </li> 
+            </ul>
+        </section>
+        <section class="get-in-touch">
+            <h2>Get in Touch</h2>
+            <p>Phone: 123-456-789-0</p>
+            <p>Email: cancerdetection@gmail.com</p>
+            <p>Address: xyz vally, chandigarh</p>
+            <p>Sequence wise: Phone: 123-456-789-0, <br>Email: cancerdetection@gmail.com, <br>Address: xyz vally, Chandighar</p>
+        </section>
+        <section class="social-media">
+            <h2>Stay Connected</h2>
+            <ul>
+                <li><a href="https://twitter.com/cancerdetection" target="_blank">Twitter</a></li>
+                <li><a href="https://facebook.com/cancerdetection" target="_blank">Facebook</a></li>
+                <li><a href="https://linkedin.com/company/cancerdetection" target="_blank">LinkedIn</a></li>
+            </ul>
+        </section>
+        <section class="feedback" id="feedback-section"> 
+            <h2>Feedback</h2>
+            <form id="feedback-form">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name"><br><br>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email"><br><br>
+                <label for="message">Message:</label>
+                <textarea id="message" name="message"></textarea><br><br>
+                <input type="submit" value="Send">
+            </form>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>

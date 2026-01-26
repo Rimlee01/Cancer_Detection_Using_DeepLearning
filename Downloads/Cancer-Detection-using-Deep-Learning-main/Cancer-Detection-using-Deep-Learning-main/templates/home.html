@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='styles/home_styles.css')}}">
+</head>
+
+<body>
+
+    <header>
+        <h1>Cancer Detection Initiative</h1>
+        <p>Early Detection Saves Lives</p>
+        <nav>
+            <a href="{{ url_for('About')}}">About Us</a>
+            <a href="{{ url_for('Service')}}">Services</a>
+            <a href="{{ url_for('Contact')}}">Contact Us</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h2>Detect Cancer Early</h2>
+        <p>Our advanced screening tools help identify cancer at its earliest stages, giving you the best chance for
+            recovery and treatment.</p>
+            <a href="{{url_for('learn')}}">
+                <button>Learn More</button>
+            </a>
+    </section>
+
+    <section class="main">
+        <div class="card">
+            <img src="{{ url_for('static', filename='images/2.png') }}" alt="Example Image">
+            <h3>About Our Research</h3>
+            <p>We are pioneers in cancer detection research, focusing on early diagnosis methods using AI and data
+                science.</p>
+            <button id="read-more-content">Read More</button>
+            <div id="read-more-content" style="display: none;">
+                <h2>Early Cancer Detection: The Future of Healthcare</h2>
+                <p>Cancer is one of the leading causes of death worldwide, and early detection is crucial for effective treatment and survival. Our research focuses on developing innovative AI-powered solutions for early cancer detection, leveraging the power of data science and machine learning.</p>
+                <h3>Our Approach</h3>
+                <p>Our team of experts is dedicated to creating a robust and accurate system that can detect cancer at an early stage, reducing the risk of mortality and improving the quality of life for patients. Our approach involves:</p>
+                <ul>
+                    <li><b>Data Analysis</b>: We collect and analyze large datasets of cancer cases, using machine learning algorithms to identify patterns and anomalies.</li>
+                    <li><b>AI-powered Diagnosis</b>: Our system uses computer vision and deep learning techniques to analyze medical images, such as MRI and CT scans, to detect cancerous cells and tumors.</li>
+                    <li><b>Personalized Medicine</b>: We develop personalized treatment plans based on individual patient data, ensuring that each patient receives the most effective treatment.</li>
+                </ul>
+                <h3>Benefits</h3>
+                <p>Our early cancer detection system has the potential to:</p>
+                <ul>
+                    <li><b>Save Lives</b>: Early detection can increase the chances of survival and reduce mortality rates.</li>
+                    <li><b>Improve Treatment</b>: Accurate diagnosis enables targeted treatment, reducing the risk of unnecessary procedures and improving patient outcomes.</li>
+                    <li><b>Reduce Healthcare Costs</b>: Early detection can reduce the economic burden of cancer treatment on individuals and healthcare systems.</li>
+                </ul>
+                <h3>Get Involved</h3>
+                <p>If you\'re interested in learning more about our research or would like to collaborate with us, please contact us at <a href="mailto:info@example.com">info@example.com</a> or visit our website at <a href="http://example.com">example.com</a>.</p>
+
+            </div>
+        </div>
+        
+        <div class="card">
+            <img src="{{ url_for('static', filename='images/search.jpeg') }}" alt="Example Image">
+            <h3>Our Services</h3>
+            <p>From genetic testing to preventive screenings, we offer a range of services to help detect and prevent
+                cancer.</p>
+            <button>Explore Services</button>
+        </div>
+
+        <div class="card">
+            <img src="{{ url_for('static', filename='images/1.png') }}" alt="Example Image">
+            <h3>Get in Touch</h3>
+            <p>Contact us today for more information about our cancer detection programs and services.</p>
+            <button>Contact Us</button>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Cancer Detection Initiative. All rights reserved.</p>
+        <p>Visit our <a href="{{url_for('privacy')}}">Privacy Policy</a> | <a href="{{url_for('terms')}}">Terms of Service</a></p>
+    </footer>
+
+</body>
+
+</html>

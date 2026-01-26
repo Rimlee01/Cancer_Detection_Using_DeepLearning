@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Entry Form</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='styles/breast_form.css')}}">
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Data Entry Form</h2>
+    <form method="POST" action="{{url_for('breast_cancer_detection')}}" enctype="multipart/form-data">
+        <input type="file" name='image' class='btn'><br><br><br>
+        <input type="submit" class='btn'>
+    </form>
+</div>
+
+</body>
+</html>

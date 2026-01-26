@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Our Services</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='styles/styles.css')}}">
+</head>
+<body>
+
+  <!-- Header Section -->
+  <header>
+    <div class="container">
+      <nav>
+        <ul>
+          <li><a href="{{url_for('main')}}">Home</a></li>
+          <li><a href="{{url_for('About')}}">About</a></li>
+          <li><a href="{{url_for('Contact')}}">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <h2>Our Services</h2>
+      <p>We provide the best cancer detection model for reduce cancer paient.</p>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+
+  <section class="services">
+    
+        <div class="container">
+          <a href="{{url_for('forms')}}">
+            <div class="service-box">
+              <h3> Lung Cancer</h3>
+              <p>We build build a machine learnig model to detect the Lung Cancer which is 97% accurecy,Lest try it</p>
+            </div>
+          </a>
+          <a href="{{url_for('breast_cancer')}}">
+            <div class="service-box">
+              <h3>Breast Cancer</h3>
+              <p>We build build a machine learnig model to detect the Lung Cancer which is 97% accurecy,Lest try it</p>
+            </div>
+          </a>
+  <!-- Call-to-Action Section -->
+  <section class="cta">
+    <div class="container">
+      <h2>Ready to work with us?</h2>
+      <p>Contact us today to discuss your project and take your business to the next level.</p>
+      <a href="{{url_for('Contact')}}" class="cta-button">Get in Touch</a>
+    </div>
+  </section>
+
+  <!-- Footer Section -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2024 Company Name. All rights reserved.</p>
+      <div class="social-links">
+        <a href="#">Facebook</a> | 
+        <a href="#">Twitter</a> | 
+        <a href="#">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

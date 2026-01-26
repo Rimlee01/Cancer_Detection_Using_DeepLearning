@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lung Cancer Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/lungh_form.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <div class="welcome-box">
+            <h2>Welcome to Our Lung Cancer Detection Service</h2>
+            <p>Upload a chest scan to detect possible signs of lung cancer using AI.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('predict') }}" enctype="multipart/form-data" class="upload-form">
+            <label for="imageUpload" class="custom-file-upload">Choose Image</label>
+            <input type="file" name="image" id="imageUpload" accept="image/*" required>
+            <br>
+            <input type="submit" value="Detect" class="submit-btn">
+        </form>
+    </div>
+
+</body>
+</html>

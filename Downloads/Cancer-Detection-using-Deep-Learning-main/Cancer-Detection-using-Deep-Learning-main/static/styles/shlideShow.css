@@ -1,0 +1,89 @@
+*{
+  margin: 0;
+  padding: 0;
+}
+
+.slider{
+  width: 100%; /* Adjust width to 75% of the viewport */
+  height: calc(75vh - 20px); /* Adjust height to 75% of the viewport, subtracting the margin */
+  overflow: hidden;
+  margin-bottom: 20px; /* Margin at the bottom */
+  margin: 0 auto; /* Center the slider horizontally */
+}
+
+figure{
+  position: relative;
+  left: 0;
+  width: 400%; 
+  animation: 10s slide infinite;
+}
+
+.slide{
+  position: relative;
+  width: 25%;
+  float: left;
+  background-color: black;
+  z-index: 1;
+}
+
+.slide h1{
+  position: absolute;
+  font-size: 3em;
+  width: 100%;
+  text-align: center;
+  margin-top: 50px;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.slide img{
+  width: 100%; /* Image width now adapts to the slider's width */
+  height: calc(75vh - 20px); /* Height is adjusted to fit 75% of the viewport */
+  object-fit: cover; /* Keep the image covering the slider area */
+  opacity: 0.4;
+}
+
+@keyframes slide{
+  0%{
+      left:0;
+  }
+  10%{
+      left:0;
+  }
+  20%{
+      left:-100%;
+  }
+  30%{
+      left:-100%;
+  }
+  40%{
+      left:-200%;
+  }
+  50%{
+      left:-200%;
+  }
+  55%{
+      left:-300%;
+  }
+  65%{
+      left:-300%;
+  }
+  66%{
+      left:-200%;
+  }
+  74%{
+      left:-200%;
+  }
+  75%{
+      left:-100%;
+  }
+  85%{
+      left:-100%;
+  }
+  90%{
+      left:0;
+  }
+  1000%{
+      left:0;
+  }
+}

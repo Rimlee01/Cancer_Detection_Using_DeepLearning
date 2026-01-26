@@ -1,0 +1,335 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+header {
+    background-color: #003366;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+
+header h1 {
+    margin-bottom: 10px;
+    font-size: 36px;
+}
+
+header p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+nav a {
+    color: white;
+    padding: 10px 20px;
+    margin: 0 10px;
+    text-decoration: none;
+    font-weight: bold;
+    background-color: #00509E;
+    border-radius: 5px;
+}
+
+nav a:hover {
+    background-color: #003366;
+}
+
+.hero {
+  background: url('blog-mobile.jpg') no-repeat center center/cover;
+  height: 90vh;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.hero h2 {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.hero p {
+  font-size: 20px;
+  margin-bottom: 30px;
+  max-width: 600px;
+  margin-right: 24%;
+}
+
+.hero button {
+  padding: 12px 30px;
+  font-size: 18px;
+  background-color: #ff6347;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.hero button:hover {
+  background-color: #ff4500;
+}
+
+/* Main Section */
+.main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 40px 0;
+    padding: 20px;
+}
+
+.card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    padding: 20px;
+    max-width: 300px;
+    text-align: center;
+}
+
+.card img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.card h3 {
+    margin-top: 15px;
+    font-size: 24px;
+    color: #003366;
+}
+
+.card p {
+    font-size: 16px;
+    margin: 10px 0;
+    color: #555;
+}
+
+.card button {
+    padding: 10px 20px;
+    background-color: #003366;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.card button:hover {
+    background-color: #00509E;
+}
+
+/* Footer */
+footer {
+    background-color: #003366;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+
+footer p {
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+footer a {
+    color: #ff6347;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+  }
+  
+  /* Container */
+  .container {
+    width: 80%;
+    margin: 0 auto;
+    max-width: 1200px;
+  }
+  
+  /* Header Section */
+  header {
+    background: #333;
+    color: #fff;
+    padding: 10px 0;
+    text-align: center;
+  }
+  
+  header h1 {
+    font-size: 2rem;
+  }
+  
+  nav ul {
+    list-style: none;
+    margin: 10px 0;
+  }
+  
+  nav ul li {
+    display: inline;
+    margin: 0 15px;
+  }
+  
+  nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.1rem;
+  }
+  
+  nav ul li a:hover {
+    color: #f8b400;
+  }
+  
+  /* Hero Section */
+  .hero {
+    background: url('/static/images/blog-mobile.jpg') no-repeat center center/cover;
+    height: 90vh;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 20px;
+  }
+  
+  .hero h2 {
+    font-size: 48px;
+    margin-bottom: 10px;
+  }
+  
+  .hero p {
+    font-size: 20px;
+    margin-bottom: 30px;
+    max-width: 600px;
+    margin-left: 24%;
+  }
+  
+  .hero button {
+    padding: 12px 30px;
+    font-size: 18px;
+    background-color: #ff6347;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .hero button:hover {
+    background-color: #ff4500;
+  }
+  
+  /* Services Section */
+  .services {
+    background-color: white;
+    padding: 50px 0;
+    text-align: center;
+  }
+  
+  .service-box {
+    background: whitesmoke;
+    padding: 20px;
+    margin: 20px;
+    display: inline-block;
+    width: calc(30% - 40px);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    height: 200px;
+  }
+  
+  .service-box h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #00509E;
+  }
+  
+  .service-box p {
+    font-size: 1rem;
+    color: #666;
+  }
+  
+  .service-box:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Call-to-Action Section */
+  .cta {
+    background-color: #333;
+    color: #fff;
+    padding: 50px 0;
+    text-align: center;
+  }
+  
+  .cta h2 {
+    font-size: 2.5rem;
+  }
+  
+  .cta p {
+    font-size: 1.2rem;
+    margin: 20px 0;
+  }
+  
+  .cta-button {
+    padding: 10px 30px;
+    background-color: #f8b400;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.1rem;
+    border-radius: 5px;
+  }
+  
+  .cta-button:hover {
+    background-color: #e0a200;
+  }
+  
+  /* Footer Section */
+  footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px 0;
+    text-align: center;
+  }
+  
+  footer p {
+    margin-bottom: 10px;
+  }
+  
+  .social-links a {
+    color: #fff;
+    margin: 0 5px;
+    text-decoration: none;
+  }
+  
+  .social-links a:hover {
+    color: #f8b400;
+  }

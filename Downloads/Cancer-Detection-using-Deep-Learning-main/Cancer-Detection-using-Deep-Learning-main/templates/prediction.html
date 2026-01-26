@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cancer Detection Result</title>
+    <link href="{{ url_for('static', filename='styles/predict.css') }}" rel="stylesheet">
+    <script>
+        // Show result after 3 seconds (simulate processing time)
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('result').style.display = 'block';
+            }, 3000);
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Analyzing your result, please wait...</p>
+        </div>
+
+        <div id="result" class="result-card" style="display: none;">
+            {% if data[0][0]==1 %}
+                <h2 class="benign">Result: Benign</h2>
+            {% elif data[0][1]==1 %}
+                <h2 class="malignant">Result: Malignant</h2>
+            {% else %}
+                <h2 class="normal">Result: Normal</h2>
+            {% endif %}
+            <a href="/" class="btn">Go Back</a>
+        </div>
+    </div>
+</body>
+</html>
