@@ -1,0 +1,802 @@
+# GitOps: The Castle Builds Itself
+
+> *"Write the blueprint once, and the castle rebuilds itself every time you change the plans."*
+
+## The Purpose: Autograph Deploys Automatically
+
+**Why are we doing this?** So Autograph deploys itself whenever we push code.
+
+No more `kubectl apply` commands. No more "it works on my machine." Push to Git, and ArgoCD makes the cluster match your intent. *The castle watches its blueprints and rebuilds any room that changes.*
+
+```mermaid
+flowchart TB
+    subgraph Before["❌ WITHOUT GITOPS"]
+        B1["Developer runs kubectl"]
+        B2["No audit trail"]
+        B3["'Who deployed that?'"]
+        B4["Manual rollbacks"]
+    end
+
+    subgraph After["✅ WITH GITOPS"]
+        A1["Push to Git"]
+        A2["ArgoCD syncs automatically"]
+        A3["Git history = deployment history"]
+        A4["One-click rollback"]
+    end
+
+    subgraph Result["🚀 AUTOGRAPH"]
+        R["Strapi, AI Service, databases\nall deploy automatically"]
+    end
+
+    Before -.->|"Chaos"| X["😱"]
+    After --> Result
+
+    style Result fill:#4CAF50
+```
+
+---
+
+## GitOps Principles (For Autograph)
+
+```mermaid
+flowchart LR
+    subgraph Principles["GitOps Core Principles"]
+        P1["1. Declarative"]
+        P2["2. Versioned"]
+        P3["3. Automated"]
+        P4["4. Self-Healing"]
+    end
+
+    subgraph Autograph["For Autograph"]
+        D1["YAML defines Strapi,\nPostgreSQL, AI Service"]
+        D2["Git history shows\nevery Autograph change"]
+        D3["ArgoCD syncs\nautomatically"]
+        D4["Drift gets\nauto-corrected"]
+    end
+
+    P1 --> D1
+    P2 --> D2
+    P3 --> D3
+    P4 --> D4
+
+    style Autograph fill:#4CAF50
+```
+
+---
+
+## Traditional vs GitOps (Autograph Flow)
+
+```mermaid
+flowchart TB
+    subgraph Traditional["Traditional: Push Model"]
+        Dev1["Developer"]
+        CI1["CI Pipeline"]
+        Push1["kubectl apply"]
+        K8S1["k3s Cluster"]
+
+        Dev1 -->|"1. Strapi code change"| CI1
+        CI1 -->|"2. Build image"| CI1
+        CI1 -->|"3. kubectl apply"| Push1
+        Push1 -->|"4. Direct push"| K8S1
+    end
+
+    subgraph GitOps["GitOps: Pull Model"]
+        Dev2["Developer"]
+        Git["Git Repository\n(autograph-infra)"]
+        Argo["ArgoCD"]
+        K8S2["k3s Cluster"]
+
+        Dev2 -->|"1. Update deployment.yaml"| Git
+        Git -->|"2. Webhook"| Argo
+        Argo -->|"3. Pull & Apply"| K8S2
+        K8S2 -.->|"4. Status"| Argo
+    end
+
+    style GitOps fill:#4CAF50
+```
+
+**Key difference:** ArgoCD **pulls** from Git (secure) instead of CI **pushing** to cluster (risky).
+
+---
+
+## Why ArgoCD for Autograph?
+
+| Feature | ArgoCD | Flux |
+|---------|--------|------|
+| **UI** | Rich web dashboard | CLI only |
+| **Multi-cluster** | Native support | Requires setup |
+| **App of Apps** | Built-in pattern | Manual |
+| **Rollback** | One-click | Manual |
+| **Health checks** | Extensive (perfect for Strapi) | Basic |
+| **RBAC** | Fine-grained | Basic |
+
+**For Autograph:** ArgoCD's UI lets you see Strapi deployment status at a glance. One click to rollback if an AI service update fails.
+
+---
+
+## ArgoCD Architecture
+
+```mermaid
+flowchart TB
+    subgraph ArgoCD["ArgoCD (in platform namespace)"]
+        API["API Server\n(UI, CLI)"]
+        Repo["Repo Server\n(Git clone/fetch)"]
+        Controller["Application Controller\n(Sync engine)"]
+        Redis["Redis\n(Caching)"]
+    end
+
+    subgraph External["External"]
+        Git["github.com/pearlthoughts/\nautograph-infra"]
+        K8S["k3s Cluster"]
+    end
+
+    subgraph Users["Users"]
+        UI["ArgoCD Web UI"]
+        CLI["argocd CLI"]
+    end
+
+    UI --> API
+    CLI --> API
+    Repo --> Git
+    Controller --> K8S
+    Controller --> Repo
+
+    style ArgoCD fill:#4CAF50
+```
+
+---
+
+## Autograph Application Definition
+
+```yaml
+# argocd/applications/strapi.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: autograph-strapi
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: autograph
+
+  source:
+    repoURL: https://github.com/pearlthoughts/autograph-infra.git
+    targetRevision: main
+    path: k8s/apps/strapi
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: autograph
+
+  syncPolicy:
+    automated:
+      prune: true           # Delete resources not in Git
+      selfHeal: true        # Fix manual kubectl changes
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+```
+
+---
+
+## Autograph Sync Flow
+
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant Git as GitHub
+    participant Argo as ArgoCD
+    participant K8S as k3s Cluster
+    participant CAI as Autograph
+
+    Dev->>Git: 1. Update strapi deployment.yaml\n(new image tag)
+
+    Note over Argo: Webhook triggers (or 3-min poll)
+    Git->>Argo: 2. New commits detected
+
+    Argo->>Argo: 3. Compare: Git vs Cluster
+
+    alt Out of Sync
+        Argo->>K8S: 4. Apply new Strapi deployment
+        K8S->>CAI: 5. Rolling update Strapi pods
+        CAI-->>K8S: 6. New pods ready
+
+        Argo->>Argo: 7. Health check Strapi
+
+        alt Healthy
+            Note over Argo: ✅ Synced, Healthy
+            Argo-->>Dev: Slack: "Strapi v1.2.3 deployed"
+        else Degraded
+            Note over Argo: ⚠️ Synced, Degraded
+            Argo-->>Dev: Alert: "Strapi unhealthy!"
+        end
+    else In Sync
+        Note over Argo: No action needed
+    end
+```
+
+---
+
+## App of Apps: Autograph's Magic Trick
+
+One root application deploys ALL of Autograph. *One ring to rule them all.*
+
+```mermaid
+flowchart TB
+    subgraph Root["Root Application"]
+        AOA["autograph-app-of-apps"]
+    end
+
+    subgraph Platform["Platform Services"]
+        CERT["cert-manager\n(TLS certs)"]
+        ING["nginx-ingress\n(routing)"]
+        LH["longhorn\n(storage)"]
+        MON["monitoring\n(Prometheus)"]
+    end
+
+    subgraph Autograph["Autograph Product"]
+        STRAPI["strapi\n(CMS)"]
+        AI["ai-service\n(Claude/OpenAI)"]
+        PG["postgres\n(database)"]
+        REDIS["redis\n(cache)"]
+        MEILI["meilisearch\n(search)"]
+    end
+
+    AOA --> CERT
+    AOA --> ING
+    AOA --> LH
+    AOA --> MON
+    AOA --> STRAPI
+    AOA --> AI
+    AOA --> PG
+    AOA --> REDIS
+    AOA --> MEILI
+
+    style Autograph fill:#4CAF50
+```
+
+### Root Application
+
+```yaml
+# argocd/app-of-apps.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: autograph-app-of-apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/pearlthoughts/autograph-infra.git
+    targetRevision: main
+    path: argocd/applications
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+```
+
+### Child Applications
+
+```yaml
+# argocd/applications/strapi.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: strapi
+  namespace: argocd
+spec:
+  project: autograph
+  source:
+    repoURL: https://github.com/pearlthoughts/autograph-infra.git
+    targetRevision: main
+    path: k8s/apps/strapi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: autograph
+  syncPolicy:
+    automated:
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+# argocd/applications/ai-service.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ai-service
+  namespace: argocd
+spec:
+  project: autograph
+  source:
+    repoURL: https://github.com/pearlthoughts/autograph-infra.git
+    targetRevision: main
+    path: k8s/apps/ai-service
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: autograph
+  syncPolicy:
+    automated:
+      selfHeal: true
+---
+# argocd/applications/postgres.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: postgres
+  namespace: argocd
+spec:
+  project: autograph
+  source:
+    repoURL: https://github.com/pearlthoughts/autograph-infra.git
+    targetRevision: main
+    path: k8s/apps/postgres
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: autograph
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: false  # Never auto-delete database!
+```
+
+---
+
+## Autograph Repository Structure
+
+```
+autograph-infra/
+├── argocd/
+│   ├── app-of-apps.yaml         # Bootstrap (deploy this first)
+│   ├── applications/            # One file per app
+│   │   ├── strapi.yaml
+│   │   ├── ai-service.yaml
+│   │   ├── postgres.yaml
+│   │   ├── redis.yaml
+│   │   ├── meilisearch.yaml
+│   │   ├── cert-manager.yaml
+│   │   ├── nginx-ingress.yaml
+│   │   └── monitoring.yaml
+│   └── projects/
+│       ├── autograph.yaml       # Autograph project RBAC
+│       └── platform.yaml        # Platform project RBAC
+│
+├── k8s/
+│   ├── base/
+│   │   ├── namespaces/
+│   │   │   └── autograph.yaml
+│   │   └── rbac/
+│   │       └── autograph-sa.yaml
+│   │
+│   └── apps/
+│       ├── strapi/
+│       │   ├── deployment.yaml
+│       │   ├── service.yaml
+│       │   ├── ingress.yaml
+│       │   ├── configmap.yaml
+│       │   ├── sealed-secret.yaml
+│       │   └── kustomization.yaml
+│       │
+│       ├── ai-service/
+│       │   ├── deployment.yaml
+│       │   ├── service.yaml
+│       │   └── sealed-secret.yaml  # API keys
+│       │
+│       ├── postgres/
+│       │   ├── statefulset.yaml
+│       │   ├── service.yaml
+│       │   ├── pvc.yaml
+│       │   └── sealed-secret.yaml
+│       │
+│       ├── redis/
+│       │   ├── deployment.yaml
+│       │   └── service.yaml
+│       │
+│       └── meilisearch/
+│           ├── statefulset.yaml
+│           ├── service.yaml
+│           └── pvc.yaml
+│
+└── helm/
+    └── values/
+        ├── monitoring-values.yaml
+        └── nginx-ingress-values.yaml
+```
+
+---
+
+## Sync Waves: Deploy in Order
+
+Autograph components must deploy in order: namespace → secrets → database → app.
+
+```mermaid
+flowchart LR
+    subgraph Wave1["Wave -1: Prerequisites"]
+        NS["Namespace\nautograph"]
+        CERT["cert-manager\n(for TLS)"]
+    end
+
+    subgraph Wave2["Wave 0: Secrets"]
+        SEC["Sealed Secrets\n(DB creds, API keys)"]
+    end
+
+    subgraph Wave3["Wave 1: Data Layer"]
+        PG["PostgreSQL"]
+        REDIS["Redis"]
+        MEILI["Meilisearch"]
+    end
+
+    subgraph Wave4["Wave 2: Application"]
+        AI["AI Service"]
+        STRAPI["Strapi"]
+    end
+
+    Wave1 --> Wave2 --> Wave3 --> Wave4
+```
+
+```yaml
+# Namespace first (wave -1)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: autograph
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+---
+# Secrets next (wave 0)
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: postgres-credentials
+  namespace: autograph
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+---
+# Database before app (wave 1)
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: autograph
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+---
+# Strapi after database (wave 2)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strapi
+  namespace: autograph
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+```
+
+---
+
+## Sync Hooks: Database Migrations
+
+Run Strapi migrations before deploying new version:
+
+```yaml
+# Pre-sync hook: Run database migrations
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: strapi-migrate
+  namespace: autograph
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      containers:
+        - name: migrate
+          image: ghcr.io/pearlthoughts/autograph-strapi:v1.2.3
+          command: ["npm", "run", "strapi", "migrate"]
+          env:
+            - name: DATABASE_HOST
+              value: postgres-headless
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+      restartPolicy: Never
+---
+# Post-sync hook: Notify team
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: notify-deployment
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      containers:
+        - name: notify
+          image: curlimages/curl
+          command:
+            - /bin/sh
+            - -c
+            - |
+              curl -X POST $SLACK_WEBHOOK \
+                -d '{"text": "🚀 Autograph Strapi deployed!"}'
+      restartPolicy: Never
+```
+
+---
+
+## Autograph Health Checks
+
+ArgoCD monitors Autograph health—green means users can create content.
+
+```mermaid
+flowchart TB
+    subgraph HealthStatus["Autograph Health Status"]
+        Healthy["✅ Healthy\nStrapi serving, DB connected"]
+        Progressing["🔄 Progressing\nRolling update in progress"]
+        Degraded["⚠️ Degraded\nStrapi crashlooping"]
+        Missing["❌ Missing\nPods not scheduled"]
+    end
+
+    subgraph Components["What ArgoCD Checks"]
+        Strapi["Strapi Deployment\n(3/3 replicas ready?)"]
+        PG["PostgreSQL StatefulSet\n(Pod running?)"]
+        ING["Ingress\n(Address assigned?)"]
+        PVC["PVC\n(Storage bound?)"]
+    end
+
+    Components --> HealthStatus
+
+    style Healthy fill:#4CAF50
+```
+
+---
+
+## Autograph Projects and RBAC
+
+Separate permissions for platform team vs. interns:
+
+```yaml
+# ArgoCD Project for Autograph
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: autograph
+  namespace: argocd
+spec:
+  description: Autograph product applications
+
+  sourceRepos:
+    - https://github.com/pearlthoughts/autograph-infra.git
+    - https://github.com/pearlthoughts/autograph-strapi.git
+
+  destinations:
+    - namespace: autograph
+      server: https://kubernetes.default.svc
+
+  # What resources Autograph apps can create
+  namespaceResourceWhitelist:
+    - group: ""
+      kind: ConfigMap
+    - group: ""
+      kind: Secret
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: PersistentVolumeClaim
+    - group: apps
+      kind: Deployment
+    - group: apps
+      kind: StatefulSet
+    - group: networking.k8s.io
+      kind: Ingress
+
+  # No cluster-wide resources (interns can't break the cluster)
+  clusterResourceWhitelist: []
+
+  roles:
+    - name: intern
+      description: Intern access - can sync and view
+      policies:
+        - p, proj:autograph:intern, applications, get, autograph/*, allow
+        - p, proj:autograph:intern, applications, sync, autograph/*, allow
+      groups:
+        - interns
+
+    - name: admin
+      description: Full access to Autograph
+      policies:
+        - p, proj:autograph:admin, applications, *, autograph/*, allow
+      groups:
+        - platform-team
+```
+
+---
+
+## Rollback: One Click to Safety
+
+Something broke? ArgoCD makes rollback instant.
+
+```mermaid
+sequenceDiagram
+    participant Eng as Engineer
+    participant Argo as ArgoCD
+    participant K8S as k3s Cluster
+
+    Note over Eng,K8S: Strapi v1.2.3 has a bug!
+
+    Eng->>Argo: 1. Click "Rollback" (or CLI)
+    Argo->>Argo: 2. Find previous sync (v1.2.2)
+    Argo->>K8S: 3. Apply v1.2.2 manifests
+    K8S-->>Argo: 4. Strapi v1.2.2 running
+
+    Note over K8S: Autograph back to working state
+
+    alt Permanent Fix
+        Eng->>Eng: 5. git revert (creates new commit)
+        Note over Eng,K8S: Git history preserved
+    else Hotfix Forward
+        Eng->>Eng: 5. Fix bug, push v1.2.4
+        Note over Eng,K8S: Normal deploy
+    end
+```
+
+```bash
+# CLI rollback
+argocd app rollback autograph-strapi
+
+# To specific revision
+argocd app rollback autograph-strapi --revision 42
+
+# History shows all deployments
+argocd app history autograph-strapi
+```
+
+---
+
+## Notifications: Know When Autograph Deploys
+
+```yaml
+# ArgoCD Notifications ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+data:
+  service.slack: |
+    token: $slack-token
+
+  template.autograph-deployed: |
+    message: |
+      {{if eq .serviceType "slack"}}:rocket:{{end}} Autograph {{.app.metadata.name}} deployed!
+      Version: {{.app.status.sync.revision | substr 0 7}}
+      Status: {{.app.status.health.status}}
+
+  template.autograph-degraded: |
+    message: |
+      {{if eq .serviceType "slack"}}:warning:{{end}} Autograph {{.app.metadata.name}} is DEGRADED!
+      Check ArgoCD: https://argocd.autograph.io/applications/{{.app.metadata.name}}
+
+  trigger.on-deployed: |
+    - when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
+      send: [autograph-deployed]
+
+  trigger.on-health-degraded: |
+    - when: app.status.health.status == 'Degraded'
+      send: [autograph-degraded]
+
+  subscriptions: |
+    - recipients:
+        - slack:autograph-deploys
+      triggers:
+        - on-deployed
+        - on-health-degraded
+```
+
+---
+
+## ArgoCD CLI Essentials for Autograph
+
+```bash
+# Login to ArgoCD
+argocd login argocd.autograph.io
+
+# List all Autograph applications
+argocd app list
+
+# Check Strapi status
+argocd app get autograph-strapi
+
+# Sync Strapi (if auto-sync disabled)
+argocd app sync autograph-strapi
+
+# Force sync (recreate resources)
+argocd app sync autograph-strapi --force
+
+# See what would change
+argocd app diff autograph-strapi
+
+# View deployment history
+argocd app history autograph-strapi
+
+# Rollback to previous version
+argocd app rollback autograph-strapi
+
+# Refresh (check Git for new commits)
+argocd app refresh autograph-strapi
+```
+
+---
+
+## CI/CD Integration: Full Autograph Pipeline
+
+```mermaid
+flowchart LR
+    subgraph Code["Source Code"]
+        SC["autograph-strapi\n(application code)"]
+    end
+
+    subgraph CI["GitHub Actions"]
+        BUILD["Build & Test"]
+        IMG["Build Image\nghcr.io/..."]
+        SCAN["Security Scan\n(Trivy)"]
+        UPDATE["Update infra repo\n(new image tag)"]
+    end
+
+    subgraph Infra["Infrastructure Repo"]
+        YAML["autograph-infra\n(Kubernetes manifests)"]
+    end
+
+    subgraph CD["ArgoCD"]
+        SYNC["Auto-sync"]
+        DEPLOY["Deploy to k3s"]
+    end
+
+    subgraph Cluster["Autograph"]
+        STRAPI["Strapi Running"]
+    end
+
+    SC -->|"Push"| BUILD --> IMG --> SCAN --> UPDATE
+    UPDATE -->|"PR + Merge"| YAML
+    YAML -->|"Webhook"| SYNC --> DEPLOY --> STRAPI
+
+    style Cluster fill:#4CAF50
+```
+
+---
+
+## What's Next
+
+Once ArgoCD is deploying Autograph:
+
+1. **Deploy Autograph** — [Exercise 10: Strapi Deployment](../04-Internship/Exercises/10-Autograph-Strapi-Deployment.md)
+2. **Observability** — [Observability Stack](../03-Platform/02-Observability.md) to watch Autograph
+3. **Security** — [Security](../03-Platform/03-Security.md) to protect Autograph
+
+---
+
+## Related
+
+- [Infrastructure-as-Code](./02-Infrastructure-as-Code.md) — Create the VMs
+- [Configuration Management](./03-Configuration-Management.md) — Install k3s
+- [Container Orchestration](./04-Container-Orchestration.md) — Understand k3s concepts
+
+---
+
+*Last Updated: 2026-02-02*
